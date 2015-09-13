@@ -4,7 +4,7 @@ package org.timothyb89.trace.model.ply;
  *
  * @author timothyb
  */
-public class PLYParseException extends Exception {
+public class PLYParseException extends RuntimeException {
 
 	/**
 	 * Creates a new instance of <code>PLYParseException</code> without detail

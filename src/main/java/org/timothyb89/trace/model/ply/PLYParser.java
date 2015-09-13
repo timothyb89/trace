@@ -1,48 +1,57 @@
 package org.timothyb89.trace.model.ply;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
+import lombok.ToString;
 import static org.timothyb89.trace.model.ply.PLYParseUtil.*;
 
 /**
  *
  * @author timothyb
  */
+@ToString(of = {"state", "elements"})
 public class PLYParser {
 	
 	private List<String> rawLines;
-	
 	private List<PLYElement> elements;
+	
+	private State state;
 	private PLYElement currentElement;
 	
 	private int bodyElementIndex;
 	private int bodyEntryIndex;
 	
 	public PLYParser() {
+		rawLines = new ArrayList<>();
 		elements = new ArrayList<>();
+		state = headerMagic;
 	}
 	
-	public void read(List<String> lines) throws PLYParseException {
-		State state = headerMagic;
+	public void read(String line) throws PLYParseException {
+		line = line.trim();
+		if (line.isEmpty()) {
+			return;
+		}
 		
-		int i = 1;
+		rawLines.add(line);
+		
 		try {
-			for (String line : lines) {
-				line = line.trim();
-				if (line.isEmpty()) {
-					continue;
-				}
-
-				State newState = state.handle(line);
-				if (newState != null) {
-					state = newState;
-				}
-
-				i++;
+			State newState = state.handle(line);
+			if (newState != null) {
+				state = newState;
 			}
 		} catch (PLYParseException ex) {
 			throw new PLYParseException(
-					String.format("Error, line #%d: %s", i, ex.getMessage()),
+					String.format(
+							"Error, line #%d: %s",
+							rawLines.size(),
+							ex.getMessage()),
 					ex);
 		}
 	}
@@ -51,17 +60,19 @@ public class PLYParser {
 		PLYElement e = elements.get(bodyElementIndex);
 		if (bodyEntryIndex >= e.length()) {
 			bodyElementIndex++;
+			System.out.println(Arrays.toString(elements.toArray()));
 			if (bodyElementIndex >= elements.size()) {
 				throw new PLYParseException(
 						"Data exceeds specified header elements!");
 			}
 			
-			e = elements.get(bodyEntryIndex);
+			e = elements.get(bodyElementIndex);
 			
 			bodyEntryIndex = 0;
 		}
 		
 		e.addEntry(line);
+		bodyEntryIndex++;
 		
 		return null;
 	};
@@ -75,6 +86,7 @@ public class PLYParser {
 				}),
 				directive("element", args -> {
 					currentElement = new PLYElement(args);
+					elements.add(currentElement);
 					return null;
 				}),
 				exact("end_header", () -> {
@@ -90,6 +102,8 @@ public class PLYParser {
 				COMMENT, // allow, but no-op
 				directive("element", args -> {
 					currentElement = new PLYElement(args);
+					elements.add(currentElement);
+					
 					return headerElementInner;
 				}));
 	};
@@ -101,5 +115,24 @@ public class PLYParser {
 	private final State headerMagic = (line) -> {
 		return expect(line, exact("ply", () -> headerFormat));
 	};
+	
+	public static PLYParser readPath(Path path) throws PLYParseException {
+		PLYParser parser = new PLYParser();
+		
+		try (Stream<String> lines = Files.lines(path)) {
+			lines.forEach(parser::read);
+			
+			return parser;
+		} catch (IOException ex) {
+			throw new PLYParseException(
+					"Unable to read file: " + ex.getMessage(),
+					ex);
+		}
+	}
+	
+	public static void main(String[] args) {
+		PLYParser p = readPath(Paths.get("data/octahedron.ply"));
+		
+	}
 	
 }
