@@ -13,7 +13,7 @@ public class Matrix {
 	private final int rows;
 	private final int cols;
 
-	private double[] data;
+	protected double[] data;
 
 	public Matrix(int rows, int cols) {
 		this.rows = rows;
@@ -51,6 +51,14 @@ public class Matrix {
 
 	public double[] data() {
 		return data;
+	}
+
+	public Matrix data(double[] data) {
+		if (data.length != rows * cols) {
+			throw new IllegalArgumentException("Unable to change data length");
+		}
+
+		this.data = Arrays.copyOf(data, rows * cols);
 	}
 
 	public Double[] boxData() {
@@ -211,6 +219,25 @@ public class Matrix {
 		return multiplyIterative(other);
 	}
 
+	/**
+	 * Calculates the determinant of this matrix.
+	 */
+	public double det() {
+		if (rows != cols) {
+			throw new IllegalArgumentException(
+					"Cannot calculate determinant of non-square matrix!")
+		}
+
+		int size = rows;
+		if (size == 1) {
+			return data[0];
+		} else if (size == 2) {
+			return (data[0] * data[4]) - (data[2] * data[3]);
+		} else {
+
+		}
+	}
+
 	public Matrix power(int pow) {
 		// TODO
 
@@ -328,6 +355,16 @@ public class Matrix {
 
 	public static Matrix zeroes(int rows, int cols) {
 		return new Matrix(rows, cols, new double[rows * cols]);
+	}
+
+	public static Matrix of(Vector... vectors) {
+		Matrix ret = new Matrix(vectors[0].length(), vectors.length);
+
+		for (int i = 0; i < vectors.length; i++) {
+			ret.col(i, vectors[i].data());
+		}
+
+		return ret;
 	}
 
 }

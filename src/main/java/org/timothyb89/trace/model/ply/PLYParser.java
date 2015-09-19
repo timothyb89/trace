@@ -97,25 +97,25 @@ public class PLYParser {
 				}));
 	};
 	
-	private final State headerElementOuter = (line) -> {
-		return expect(line,
-				COMMENT, // allow, but no-op
-				directive("element", args -> {
-					currentElement = new PLYElement(args);
-					elements.add(currentElement);
-					
-					return headerElementInner;
-				}));
-	};
+	private final State headerElementOuter = (line) -> expect(line,
+			COMMENT, // allow, but no-op
+			directive("element", args -> {
+				currentElement = new PLYElement(args);
+				elements.add(currentElement);
+
+				return headerElementInner;
+			}));
 	
-	private final State headerFormat = (line) -> {
-		return expect(line, exact("format ascii 1.0", () -> headerElementOuter));
-	};
+	private final State headerFormat = (line) -> expect(line,
+			exact("format ascii 1.0", () -> headerElementOuter));
 	
-	private final State headerMagic = (line) -> {
-		return expect(line, exact("ply", () -> headerFormat));
-	};
-	
+	private final State headerMagic = (line) -> expect(line,
+			exact("ply", () -> headerFormat));
+
+	public Model toModel() {
+
+	}
+
 	public static PLYParser readPath(Path path) throws PLYParseException {
 		PLYParser parser = new PLYParser();
 		
@@ -132,7 +132,6 @@ public class PLYParser {
 	
 	public static void main(String[] args) {
 		PLYParser p = readPath(Paths.get("data/octahedron.ply"));
-		
 	}
 	
 }
