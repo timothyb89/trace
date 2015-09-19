@@ -1,6 +1,9 @@
 package org.timothyb89.trace.math;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -16,13 +19,21 @@ public class Matrix {
 	protected double[] data;
 
 	public Matrix(int rows, int cols) {
+		if (rows <= 0 || cols <= 0) {
+			throw new IllegalArgumentException("Invalid matrix dimensions!");
+		}
+		
 		this.rows = rows;
 		this.cols = cols;
-
+		
 		data = new double[rows * cols];
 	}
 
 	public Matrix(int rows, int cols, double[] data) {
+		if (rows <= 0 || cols <= 0) {
+			throw new IllegalArgumentException("Invalid matrix dimensions!");
+		}
+		
 		if (rows * cols != data.length) {
 			throw new IllegalArgumentException("Invalid data length!");
 		}
@@ -59,6 +70,8 @@ public class Matrix {
 		}
 
 		this.data = Arrays.copyOf(data, rows * cols);
+		
+		return this;
 	}
 
 	public Double[] boxData() {
@@ -119,6 +132,10 @@ public class Matrix {
 
 		return this;
 	}
+	
+	public Matrix col(int col, Vector vector) {
+		return col(col, vector.data());
+	}
 
 	public double val(int row, int col) {
 		if (row < 0 || row >= rows || col < 0 || col >= cols) {
@@ -161,6 +178,10 @@ public class Matrix {
 		return this;
 	}
 
+	public Matrix row(int row, Vector vector) {
+		return row(row, vector.data());
+	}
+	
 	/**
 	 * Add each element of the given matrix to this matrix.
 	 * @param other the matrix to add into this matrix
@@ -218,6 +239,33 @@ public class Matrix {
 
 		return multiplyIterative(other);
 	}
+	/**
+	 * Generate a minor of this matrix, excluding row {@code i} and column
+	 * {@code j} to produce a matrix of size {@code rows - 1 x cols - 1}.
+	 * @param i the row index to exclude
+	 * @param j the column index to exclude
+	 * @return the minor of this matrix at the given row and column
+	 */
+	public Matrix minor(int i, int j) {
+		double[] ret = new double[(rows - 1) * (cols - 1)];
+		
+		int retIndex = 0;
+		for (int dataIndex = 0; dataIndex < data.length; dataIndex++) {
+			if (dataIndex / cols == i) {
+				continue;
+			}
+			
+			if (dataIndex % cols == j) {
+				continue;
+			}
+			
+			ret[retIndex] = data[dataIndex];
+			retIndex++;
+		}
+		
+		return new Matrix(rows - 1, cols - 1, ret);
+		
+	}
 
 	/**
 	 * Calculates the determinant of this matrix.
@@ -225,23 +273,28 @@ public class Matrix {
 	public double det() {
 		if (rows != cols) {
 			throw new IllegalArgumentException(
-					"Cannot calculate determinant of non-square matrix!")
+					"Cannot calculate determinant of non-square matrix!");
 		}
 
 		int size = rows;
 		if (size == 1) {
 			return data[0];
 		} else if (size == 2) {
-			return (data[0] * data[4]) - (data[2] * data[3]);
+			return (data[0] * data[3]) - (data[1] * data[2]);
 		} else {
-
+			double det = 0;
+			
+			// move along first row.
+			for (int i = 0; i < size; i++) {
+				if (i % 2 == 0) {
+					det += data[i] * minor(0, i).det();
+				} else {
+					det -= data[i] * minor(0, i).det();
+				}
+			}
+			
+			return det;
 		}
-	}
-
-	public Matrix power(int pow) {
-		// TODO
-
-		return this;
 	}
 
 	/**

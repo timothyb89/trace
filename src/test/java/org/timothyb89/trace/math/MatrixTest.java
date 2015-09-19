@@ -2,8 +2,6 @@ package org.timothyb89.trace.math;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -139,6 +137,42 @@ public class MatrixTest {
 	}
 
 	@Test
+	public void testMinor() throws Exception {
+		Matrix m = Matrix.build(2, 3)
+				.row(1, 2, 3)
+				.row(4, 5, 6).get();
+		
+		assertArrayEquals(
+				Matrix.build(1, 2).row(5, 6).get().data(),
+				m.minor(0, 0).data(),
+				DELTA);
+		
+		assertArrayEquals(
+				Matrix.build(1, 2).row(1, 2).get().data(),
+				m.minor(1, 2).data(),
+				DELTA);
+		
+		assertArrayEquals(
+				Matrix.build(1, 2).row(4, 5).get().data(),
+				m.minor(0, 2).data(),
+				DELTA);
+	}
+	
+	@Test
+	public void testDet() throws Exception {
+		assertEquals(1, Matrix.identity(3).det(), DELTA);
+		assertEquals(0, Matrix.zeroes(3).det(), DELTA);
+		
+		Matrix a = Matrix.build(2).row(1, 2).row(3, 4).get();
+		Matrix b = Matrix.build(2).row(7, 6).row(8, 9).get();
+		
+		assertEquals(-2, a.det(), DELTA);
+		assertEquals(15, b.det(), DELTA);
+		
+		assertEquals(-30, b.multiply(a).det(), DELTA);
+	}
+	
+	@Test
 	public void testEpsilonEquals() throws Exception {
 		Matrix a = Matrix.identity(3);
 		Matrix b = Matrix.zeroes(3);
@@ -161,8 +195,6 @@ public class MatrixTest {
 
 	@Test
 	public void testIdentity() throws Exception {
-		assertThat(Matrix.identity(0).boxData(), is(emptyArray()));
-
 		assertThat(Matrix.identity(1).boxData(), is(array(equalTo(1.0))));
 
 		assertThat(Matrix.identity(2).boxData(), is(array(

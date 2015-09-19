@@ -112,9 +112,9 @@ public class PLYParser {
 	private final State headerMagic = (line) -> expect(line,
 			exact("ply", () -> headerFormat));
 
-	public Model toModel() {
+	//public Model toModel() {
 
-	}
+	//}
 
 	public static PLYParser readPath(Path path) throws PLYParseException {
 		PLYParser parser = new PLYParser();
