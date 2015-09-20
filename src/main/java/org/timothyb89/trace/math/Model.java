@@ -1,12 +1,21 @@
 package org.timothyb89.trace.math;
 
+import java.util.List;
+import lombok.experimental.Accessors;
+
 /**
  * @author timothyb
  */
+@Accessors(fluent = true)
 public class Model {
 
 	private Matrix vertexData;
-	
+	private List<List<Integer>> faces;
+
+	public Model(Matrix vertexData, List<List<Integer>> faces) {
+		this.vertexData = vertexData;
+		this.faces = faces;
+	}
 	
 	public Matrix vertexData() {
 		return vertexData;

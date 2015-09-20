@@ -19,8 +19,8 @@ public class PLYListProperty<T> extends PLYProperty<List<T>> {
 	private String indexType; // will always use int here
 	private PLYProperty<T> valueType;
 	
-	public PLYListProperty(String name) {
-		super(name);
+	public PLYListProperty(String name, int index) {
+		super(name, index);
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class PLYListProperty<T> extends PLYProperty<List<T>> {
 		}
 		
 		indexType = args.get(0);
-		valueType = PLYPropertyFactory.create(args.get(1), "", null);
+		valueType = PLYPropertyFactory.create(args.get(1), "", 0, null);
 		
 		return this;
 	}

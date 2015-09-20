@@ -6,8 +6,8 @@ package org.timothyb89.trace.model.ply.property;
  */
 public class PLYFloat32Property extends PLYProperty<Float> {
 
-	public PLYFloat32Property(String name) {
-		super(name);
+	public PLYFloat32Property(String name, int index) {
+		super(name, index);
 	}
 
 	@Override

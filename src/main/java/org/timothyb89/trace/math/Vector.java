@@ -141,6 +141,12 @@ public class Vector extends Matrix {
 		return this;
 	}
 
+	public boolean orthogonal(Vector other) {
+		double d = other.dot(this);
+		
+		return d > -EPSILON && d < EPSILON;
+	}
+	
 	@Override
 	public Vector copy() {
 		return new Vector(data);

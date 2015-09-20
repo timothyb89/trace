@@ -1,11 +1,6 @@
 package org.timothyb89.trace.math;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**

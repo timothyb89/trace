@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
@@ -69,7 +71,9 @@ public class PLYElement {
 		String propName = args.get(args.size() - 1);
 		List<String> propArgs = args.subList(1, args.size() - 1);
 		
-		PLYProperty p = PLYPropertyFactory.create(type, propName, propArgs);
+		PLYProperty p = PLYPropertyFactory.create(
+				type, propName, properties.size(), propArgs);
+		
 		if (p instanceof PLYListProperty) {
 			if (!properties.isEmpty()) {
 				throw new PLYParseException("List properties cannot be defined "
@@ -78,7 +82,7 @@ public class PLYElement {
 		}
 		
 		properties.add(p);
-		propertyMap.put(p.getName(), p);
+		propertyMap.put(p.name(), p);
 	}
 	
 	public void addEntry(String line) {
@@ -111,6 +115,29 @@ public class PLYElement {
 		}
 		
 		entries.add(entry);
+	}
+	
+	public PLYProperty get(String key) {
+		PLYProperty prop = propertyMap.get(key);
+		if (prop == null) {
+			throw new IllegalArgumentException(
+					"Property not found in element: " + key);
+		}
+		
+		return prop;
+	}
+	
+	public DoubleStream doubleValues(String key) {
+		PLYProperty prop = get(key);
+
+		return entries
+				.stream()
+				.mapToDouble(entry -> (double) ((float) entry.get(prop.index())));
+	}
+	
+	public <T> Stream<List<T>> listValues(String key, Class<T> type) {
+		return entries.stream()
+				.map(e -> (List<T>) e.get(0));
 	}
 	
 }

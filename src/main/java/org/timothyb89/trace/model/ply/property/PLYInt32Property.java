@@ -6,8 +6,8 @@ package org.timothyb89.trace.model.ply.property;
  */
 public class PLYInt32Property extends PLYProperty<Integer> {
 
-	public PLYInt32Property(String name) {
-		super(name);
+	public PLYInt32Property(String name, int index) {
+		super(name, index);
 	}
 
 	@Override

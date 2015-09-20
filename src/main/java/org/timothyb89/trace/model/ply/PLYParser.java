@@ -7,8 +7,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.ToString;
+import org.timothyb89.trace.math.Matrix;
+import org.timothyb89.trace.math.Model;
 import static org.timothyb89.trace.model.ply.PLYParseUtil.*;
 
 /**
@@ -60,42 +65,40 @@ public class PLYParser {
 		PLYElement e = elements.get(bodyElementIndex);
 		if (bodyEntryIndex >= e.length()) {
 			bodyElementIndex++;
-			System.out.println(Arrays.toString(elements.toArray()));
+
 			if (bodyElementIndex >= elements.size()) {
 				throw new PLYParseException(
 						"Data exceeds specified header elements!");
 			}
-			
+
 			e = elements.get(bodyElementIndex);
-			
+
 			bodyEntryIndex = 0;
 		}
-		
+
 		e.addEntry(line);
 		bodyEntryIndex++;
 		
 		return null;
 	};
 	
-	private final State headerElementInner = (line) -> {
-		return expect(line,
-				COMMENT, // allow, but no-op
-				directive("property", args -> {
-					currentElement.addProperty(args);
-					return null; // no state change
-				}),
-				directive("element", args -> {
-					currentElement = new PLYElement(args);
-					elements.add(currentElement);
-					return null;
-				}),
-				exact("end_header", () -> {
-					bodyElementIndex = 0;
-					bodyEntryIndex = 0;
-					
-					return bodyElement;
-				}));
-	};
+	private final State headerElementInner = (line) -> expect(line,
+			COMMENT, // allow, but no-op
+			directive("property", args -> {
+				currentElement.addProperty(args);
+				return null; // no state change
+			}),
+			directive("element", args -> {
+				currentElement = new PLYElement(args);
+				elements.add(currentElement);
+				return null;
+			}),
+			exact("end_header", () -> {
+				bodyElementIndex = 0;
+				bodyEntryIndex = 0;
+
+				return bodyElement;
+			}));
 	
 	private final State headerElementOuter = (line) -> expect(line,
 			COMMENT, // allow, but no-op
@@ -112,9 +115,42 @@ public class PLYParser {
 	private final State headerMagic = (line) -> expect(line,
 			exact("ply", () -> headerFormat));
 
-	//public Model toModel() {
-
-	//}
+	public PLYElement element(String name) {
+		for (PLYElement e : elements) {
+			if (e.name().equalsIgnoreCase(name)) {
+				return e;
+			}
+		}
+		
+		return null;
+	}
+	
+	public Model toModel() {
+		PLYElement vertex = element("vertex");
+		if (vertex == null) {
+			throw new PLYParseException("No vertex element found in PLY file!");
+		}
+		
+		PLYElement face = element("face");
+		if (face == null) {
+			throw new PLYParseException("No face element found in PLY file!");
+		}
+		
+		Matrix vertices = new Matrix(4, vertex.length());
+		vertices.row(0, vertex.doubleValues("x").toArray());
+		vertices.row(1, vertex.doubleValues("y").toArray());
+		vertices.row(2, vertex.doubleValues("z").toArray());
+		vertices.row(3, DoubleStream
+				.generate(() -> 1.0)
+				.limit(vertex.length())
+				.toArray());
+		
+		List<List<Integer>> faces = face.listValues("face", Integer.class)
+				.map(l -> (List<Integer>) l)
+				.collect(Collectors.toList());
+		
+		return new Model(vertices, faces);
+	}
 
 	public static PLYParser readPath(Path path) throws PLYParseException {
 		PLYParser parser = new PLYParser();
@@ -132,6 +168,10 @@ public class PLYParser {
 	
 	public static void main(String[] args) {
 		PLYParser p = readPath(Paths.get("data/octahedron.ply"));
+		Model m = p.toModel();
+		
+		System.out.println("Vertices:" + m.countVertices());
+		System.out.println(m.vertexData().format());
 	}
 	
 }
