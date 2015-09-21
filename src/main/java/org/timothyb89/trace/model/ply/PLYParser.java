@@ -5,15 +5,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.ToString;
 import org.timothyb89.trace.math.Matrix;
 import org.timothyb89.trace.math.Model;
+import org.timothyb89.trace.math.Transform;
+import org.timothyb89.trace.math.Vector;
 import static org.timothyb89.trace.model.ply.PLYParseUtil.*;
 
 /**
@@ -167,11 +167,21 @@ public class PLYParser {
 	}
 	
 	public static void main(String[] args) {
-		PLYParser p = readPath(Paths.get("data/octahedron.ply"));
+		PLYParser p = readPath(Paths.get("data/beethoven.ply"));
 		Model m = p.toModel();
 		
 		System.out.println("Vertices:" + m.countVertices());
-		System.out.println(m.vertexData().format());
+		System.out.println("Center of Mass: " + m.centerMass().format());
+		
+		System.out.println("---");
+		
+		m.transform(Transform.axisRotate(Vector.of(1, 1, 1), Math.PI / 4));
+		m.transform(Transform.scale(2, 0.5, 0.5));
+		m.transform(Transform.translate(10, 10, 10));
+		
+		System.out.println("CoM: " + m.centerMass().format());
+		
+		PLYWriter.write(m, Paths.get("data/beethoven_r.ply"));
 	}
 	
 }

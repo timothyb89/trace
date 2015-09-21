@@ -1,6 +1,8 @@
 package org.timothyb89.trace.math;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  *
@@ -133,6 +135,10 @@ public class Matrix {
 	public Matrix col(int col, Vector vector) {
 		return col(col, vector.data());
 	}
+	
+	public Stream<double[]> colStream() {
+		return IntStream.range(0, cols).mapToObj(i -> col(i));
+	}
 
 	public double val(int row, int col) {
 		if (row < 0 || row >= rows || col < 0 || col >= cols) {
@@ -177,6 +183,20 @@ public class Matrix {
 
 	public Matrix row(int row, Vector vector) {
 		return row(row, vector.data());
+	}
+	
+	public Matrix rowInsert(int row, double... values) {
+		if (row < 0 || row >= rows) {
+			throw new IllegalArgumentException("Row is out of bounds: " + row);
+		}
+
+		System.arraycopy(values, 0, data, cols * row, values.length);
+
+		return this;
+	}
+	
+	public Matrix rowInsert(int row, Vector vector) {
+		return rowInsert(row, vector.data());
 	}
 	
 	/**
@@ -266,6 +286,7 @@ public class Matrix {
 
 	/**
 	 * Calculates the determinant of this matrix.
+	 * @return the calculated determinant
 	 */
 	public double det() {
 		if (rows != cols) {

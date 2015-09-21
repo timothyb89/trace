@@ -3,6 +3,7 @@ package org.timothyb89.trace.math;
 import lombok.experimental.Accessors;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 /**
@@ -116,13 +117,17 @@ public class Vector extends Matrix {
 				(other.data[0] * this.data[1]) - (other.data[1] * this.data[0]));
 	}
 	
+	public double magnitude() {
+		return Math.sqrt(DoubleStream.of(data).map(v -> v * v).sum());
+	}
+	
 	/**
 	 * Calculates the norm of this vector, storing the result back into this
 	 * vector.
 	 * @return this vector
 	 */
 	public Vector normalize() {
-		double length = Math.sqrt(DoubleStream.of(data).map(x -> x * x).sum());
+		double length = magnitude();
 		if (length == 0) {
 			return this;
 		}
@@ -145,6 +150,30 @@ public class Vector extends Matrix {
 		double d = other.dot(this);
 		
 		return d > -EPSILON && d < EPSILON;
+	}
+	
+	public int minIndex() {
+		double minSq = 0; // magnitude?
+		int minIndex = 0;
+		
+		for (int i = 0; i < data.length; i++) {
+			double vSq = data[i];
+			vSq *= vSq;
+			
+			if (i == 0 || vSq < minSq) {
+				minSq = vSq;
+				minIndex = i;
+			}
+		}
+		
+		return minIndex;
+	}
+
+	@Override
+	public String format() {
+		return String.format("[ %s ]", DoubleStream.of(data)
+				.mapToObj(val -> String.format("%5.2f", val))
+				.collect(Collectors.joining(", ")));
 	}
 	
 	@Override

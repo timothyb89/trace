@@ -1,6 +1,7 @@
 package org.timothyb89.trace.math;
 
 import java.util.List;
+import lombok.Getter;
 import lombok.experimental.Accessors;
 
 /**
@@ -9,22 +10,12 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class Model {
 
-	private Matrix vertexData;
-	private List<List<Integer>> faces;
+	@Getter private Matrix vertexData;
+	@Getter private List<List<Integer>> faces;
 
 	public Model(Matrix vertexData, List<List<Integer>> faces) {
 		this.vertexData = vertexData;
 		this.faces = faces;
-	}
-	
-	public Matrix vertexData() {
-		return vertexData;
-	}
-	
-	public Model vertexData(Matrix vertexData) {
-		this.vertexData = vertexData;
-		
-		return this;
 	}
 
 	public int countVertices() {
@@ -32,18 +23,26 @@ public class Model {
 	}
 	
 	public Vector centerMass() {
-		throw new UnsupportedOperationException("TODO");
+		double sumX = 0;
+		double sumY = 0;
+		double sumZ = 0;
+		
+		for (int i = 0; i < vertexData.cols(); i++) {
+			double[] col = vertexData.col(i);
+			
+			sumX += col[0];
+			sumY += col[1];
+			sumZ += col[2];
+		}
+		
+		return Vector.of(
+				sumX / vertexData.cols(),
+				sumY / vertexData.cols(),
+				sumZ / vertexData.cols());
 	}
 	
-	/**
-	 * Rotate the vertices in this model {@code theta} radians about the axis
-	 * defined by the vector {@code axis}.
-	 * @param axis
-	 * @param theta
-	 * @return 
-	 */
-	public Model rotate(Vector axis, double theta) {
-		throw new UnsupportedOperationException("TODO");
+	public void transform(Matrix matrix) {
+		vertexData = vertexData.multiply(matrix);
 	}
 
 }
