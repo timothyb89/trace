@@ -19,6 +19,11 @@ mvn package
 
 An executable `.jar` will be written to `target/trace-1.0-SNAPSHOT.jar`.
 
+Note that some dependencies are required, in particular
+[Lombok preprocessor annotations](https://projectlombok.org/) and the usual
+testing libraries (JUnit, Hamcrest). None of these are included in the final
+`.jar` file.
+
 Model Manipulation REPL
 -----------------------
 Running the built `.jar` will start an interactive REPL that performs basic
