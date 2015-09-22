@@ -55,14 +55,16 @@ public class ModelREPL {
 
 	public void printInfo() {
 		System.out.printf("Model info:\n");
-		System.out.printf("    %-11s %-24d %-15s %s\n",
+		System.out.printf("    %-11s %-24d %-11s %s\n",
 				"Vertices:", model.countVertices(),
-				"Center of Mass:", model.centerMass().format());
+				"Faces:", model.countFaces());
 
 		Matrix bounds = model.boundingBox();
-		System.out.printf("    %-11s %-24s %-15s %s\n",
+		System.out.printf("    %-11s %-24s %-11s %s\n",
 				"Min Bounds:", bounds.vectorCol(0).format(),
 				"Max Bounds:", bounds.vectorCol(1).format());
+		System.out.printf("    %48s %-24s\n", "Center of Mass:",
+				model.centerMass().format());
 		System.out.println("Run '?' for help.\n");
 	}
 
@@ -71,7 +73,6 @@ public class ModelREPL {
 			System.err.println("Error: invalid args. Usage: S [x] [y] [z]");
 			return;
 		}
-
 
 		transform = transform.multiply(Transform.scale(
 				args[0], args[1], args[2]));

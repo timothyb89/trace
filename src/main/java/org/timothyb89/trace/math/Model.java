@@ -21,7 +21,11 @@ public class Model {
 	public int countVertices() {
 		return vertexData.cols();
 	}
-	
+
+	public int countFaces() {
+		return faces.size();
+	}
+
 	public Vector centerMass() {
 		double sumX = 0;
 		double sumY = 0;
