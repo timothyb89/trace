@@ -115,6 +115,10 @@ public class Matrix {
 		return box(col(col));
 	}
 
+	public Vector vectorCol(int col) {
+		return Vector.of(col(col));
+	}
+
 	public Matrix col(int col, double... values) {
 		if (values.length != rows) {
 			throw new IllegalArgumentException(

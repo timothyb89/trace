@@ -40,9 +40,53 @@ public class Model {
 				sumY / vertexData.cols(),
 				sumZ / vertexData.cols());
 	}
+
+	private double min(int i, double current, double candidate) {
+		if (i == 0 || candidate < current) {
+			return candidate;
+		}
+
+		return current;
+	}
+
+	private double max(int i, double current, double candidate) {
+		if (i == 0 || candidate > current) {
+			return candidate;
+		}
+
+		return current;
+	}
+
+	public Matrix boundingBox() {
+		double minX = 0;
+		double minY = 0;
+		double minZ = 0;
+
+		double maxX = 0;
+		double maxY = 0;
+		double maxZ = 0;
+
+		for (int i = 0; i < vertexData.cols(); i++) {
+			double[] col = vertexData.col(i);
+
+			minX = min(i, minX, col[0]);
+			minY = min(i, minY, col[1]);
+			minZ = min(i, minZ, col[2]);
+
+			maxX = max(i, maxX, col[0]);
+			maxY = max(i, maxY, col[1]);
+			maxZ = max(i, maxZ, col[2]);
+		}
+
+		return Matrix.build(3, 2)
+				.row(minX, maxX)
+				.row(minY, maxY)
+				.row(minZ, maxZ).get();
+	}
 	
-	public void transform(Matrix matrix) {
+	public Model transform(Matrix matrix) {
 		vertexData = vertexData.multiply(matrix);
+		return this;
 	}
 
 }
