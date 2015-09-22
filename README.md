@@ -47,3 +47,11 @@ For command information, run '?' from the REPL. The commands supported are:
 
  Note that the transformations are not applied until the `W` command is run.
  The different transforms will be combined to speed up the computation process.
+
+Testing
+-------
+Unit tests can be run using:
+
+```bash
+mvn test
+```
