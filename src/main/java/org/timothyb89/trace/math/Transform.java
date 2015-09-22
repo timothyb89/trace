@@ -32,37 +32,25 @@ public class Transform {
 				.row(0,    0,   1, 0)
 				.row(0,    0,   0, 1).get();
 	}
-	
+
+	public static Matrix identity() {
+		return Matrix.identity(4);
+	}
+
 	public static Matrix axisRotate(Vector axis, double radians) {
 		// norm rotation axis
 		Vector w = axis.copy().normalize();
 		
 		// axis m -> not parallel to w
 		Vector m = w.copy().val(w.minIndex(), 1.0).normalize();
-		
-		System.out.println("m: " + m.format() + " || " + m.magnitude());
-		
+
 		Vector u = m.cross(w).normalize();
 		Vector v = u.cross(w);
-		
-		System.out.printf("axis: %s, w: %s, m: %s, u: %s, v: %s\n",
-				axis.format(), w.format(), m.format(), u.format(), v.format());
-		
-		System.out.println("|u| = " + u.magnitude());
-		System.out.println("|v| = " + v.magnitude());
-		System.out.println("|w| = " + w.magnitude());
-		
-		System.out.println(u.dot(v));
-		System.out.println(v.dot(w));
-		System.out.println(u.dot(w));
 		
 		Matrix rotAxis = Matrix.identity(4)
 				.rowInsert(0, u)
 				.rowInsert(1, v)
 				.rowInsert(2, w);
-		
-		System.out.println("Rotation matrix:");
-		System.out.println(rotAxis.format());
 		
 		Matrix rotZ = rotateZ(radians);
 		
