@@ -93,4 +93,11 @@ public class Model {
 		return this;
 	}
 
+	public Model copy() {
+		return new Model(
+				vertexData.copy(),
+				faces // eff it
+		);
+	}
+
 }

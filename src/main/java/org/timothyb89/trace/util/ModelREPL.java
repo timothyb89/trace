@@ -25,6 +25,7 @@ public class ModelREPL {
 
 	private Path input;
 	private Path output;
+	private String name;
 
 	private Map<String, Consumer<double[]>> commands;
 
@@ -34,6 +35,8 @@ public class ModelREPL {
 	public ModelREPL(Path input, Path output) {
 		this.input = input;
 		this.output = output;
+
+		name = input.getFileName().toString();
 
 		commands = new HashMap<>();
 		commands.put("s", this::scale);
@@ -46,6 +49,9 @@ public class ModelREPL {
 		F.timeVoid(() -> {
 			PLYParser parser = PLYParser.readPath(input);
 			model = parser.toModel();
+
+			WebSync.clear();
+			WebSync.m(name, () -> model);
 		}).thenAcceptTime(time -> {
 			System.out.printf("done in %.3f seconds.\n", time);
 		});
@@ -76,6 +82,8 @@ public class ModelREPL {
 
 		transform = transform.multiply(Transform.scale(
 				args[0], args[1], args[2]));
+
+		sync();
 	}
 
 	public void translate(double[] args) {
@@ -86,12 +94,20 @@ public class ModelREPL {
 
 		transform = transform.multiply(Transform.translate(
 				args[0], args[1], args[2]));
+
+		sync();
 	}
 
 	public void rotate(double[] args) {
 		transform = transform.multiply(Transform.axisRotate(
 				Vector.of(args[0], args[1], args[2]),
 				Math.toRadians(args[3])));
+
+		sync();
+	}
+
+	private void sync() {
+		WebSync.m(name, () -> model.copy().transform(transform));
 	}
 
 	public void write(double[] args) {
