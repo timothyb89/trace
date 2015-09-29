@@ -32,10 +32,8 @@ public class WebSync {
 			out = new PrintWriter(socket.getOutputStream());
 
 			System.out.println("[Sync] Connected");
-			out.println("hello");
-			out.flush();
 		} catch (IOException ex) {
-			System.out.println("[Info] WebSync could not connect, disabling!");
+			System.out.println("[Info] WebSync could not connect, disabling");
 		}
 	}
 
