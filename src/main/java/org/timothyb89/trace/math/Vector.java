@@ -175,6 +175,11 @@ public class Vector extends Matrix {
 				.mapToObj(val -> String.format("%5.2f", val))
 				.collect(Collectors.joining(", ")));
 	}
+
+	@Override
+	public String toString() {
+		return String.format("Vector(%s)", format());
+	}
 	
 	@Override
 	public Vector copy() {

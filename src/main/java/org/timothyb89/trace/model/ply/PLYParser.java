@@ -14,6 +14,7 @@ import org.timothyb89.trace.math.Matrix;
 import org.timothyb89.trace.math.Model;
 import org.timothyb89.trace.math.Transform;
 import org.timothyb89.trace.math.Vector;
+import static org.timothyb89.trace.model.ParseUtil.*;
 import static org.timothyb89.trace.model.ply.PLYParseUtil.*;
 
 /**
