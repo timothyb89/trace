@@ -2,6 +2,7 @@ package org.timothyb89.trace.math;
 
 import java.util.List;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
@@ -10,10 +11,13 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class Model {
 
-	@Getter private Matrix vertexData;
-	@Getter private List<List<Integer>> faces;
+	@Getter @Setter private Matrix vertexData;
+	@Getter @Setter private List<Face> faces;
 
-	public Model(Matrix vertexData, List<List<Integer>> faces) {
+	public Model() {
+	}
+	
+	public Model(Matrix vertexData, List<Face> faces) {
 		this.vertexData = vertexData;
 		this.faces = faces;
 	}
@@ -91,6 +95,10 @@ public class Model {
 	public Model transform(Matrix matrix) {
 		vertexData = vertexData.multiply(matrix);
 		return this;
+	}
+	
+	public Vector vertex(int index) {
+		return vertexData.vectorCol(index);
 	}
 
 	public Model copy() {

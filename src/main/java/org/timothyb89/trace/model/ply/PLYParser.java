@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 import lombok.ToString;
+import org.timothyb89.trace.math.Face;
 import org.timothyb89.trace.math.Matrix;
 import org.timothyb89.trace.math.Model;
 import org.timothyb89.trace.math.Transform;
@@ -137,6 +138,8 @@ public class PLYParser {
 			throw new PLYParseException("No face element found in PLY file!");
 		}
 		
+		Model model = new Model();
+		
 		Matrix vertices = new Matrix(4, vertex.length());
 		vertices.row(0, vertex.doubleValues("x").toArray());
 		vertices.row(1, vertex.doubleValues("y").toArray());
@@ -145,12 +148,14 @@ public class PLYParser {
 				.generate(() -> 1.0)
 				.limit(vertex.length())
 				.toArray());
+		model.vertexData(vertices);
 		
-		List<List<Integer>> faces = face.listValues("face", Integer.class)
+		model.faces(face.listValues("face", Integer.class)
 				.map(l -> (List<Integer>) l)
-				.collect(Collectors.toList());
-		
-		return new Model(vertices, faces);
+				.map(l -> new Face(model, l))
+				.collect(Collectors.toList()));
+
+		return model;
 	}
 
 	public static PLYParser readPath(Path path) throws PLYParseException {

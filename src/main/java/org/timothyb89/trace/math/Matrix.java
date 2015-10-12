@@ -140,6 +140,28 @@ public class Matrix {
 		return col(col, vector.data());
 	}
 	
+	public Matrix colInsert(int col, double... values) {
+		if (col < 0 || col >= cols) {
+			throw new IllegalArgumentException(
+					"Column is out of bounds: " + col);
+		}
+		
+		if (values.length > rows) {
+			throw new IllegalArgumentException(
+					"Too many values to insert into column");
+		}
+		
+		for (int i = 0; i < values.length; i++) {
+			val(i, col, values[i]);
+		}
+		
+		return this;
+	}
+	
+	public Matrix colInsert(int col, Vector vector) {
+		return colInsert(col, vector.data());
+	}
+	
 	public Stream<double[]> colStream() {
 		return IntStream.range(0, cols).mapToObj(i -> col(i));
 	}
@@ -204,11 +226,30 @@ public class Matrix {
 	}
 	
 	/**
-	 * Add each element of the given matrix to this matrix.
+	 * Add each element of the given matrix to this matrix, storing the result
+	 * back in this matrix.
 	 * @param other the matrix to add into this matrix
 	 * @return this matrix
 	 */
 	public Matrix add(Matrix other) {
+		if (rows != other.rows || cols != other.cols) {
+			throw new IllegalArgumentException("Matrix size mismatch");
+		}
+
+		for (int i = 0; i < rows * cols; i++) {
+			data[i] += other.data[i];
+		}
+
+		return this;
+	}
+	
+	/**
+	 * Subtract each element of the given matrix from this matrix, storing the
+	 * result back in this matrix.
+	 * @param other the matrix to subtract from this matrix
+	 * @return this matrix
+	 */
+	public Matrix sub(Matrix other) {
 		if (rows != other.rows || cols != other.cols) {
 			throw new IllegalArgumentException("Matrix size mismatch");
 		}

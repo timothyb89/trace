@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.timothyb89.trace.math.Model;
 
 /**
@@ -33,8 +34,8 @@ public class PLYWriter {
 
 		model.faces().forEach(f -> pw.printf("%d %s\n",
 				f.size(),
-				f.stream()
-						.map(String::valueOf)
+				IntStream.of(f.vertices())
+						.mapToObj(String::valueOf)
 						.collect(Collectors.joining(" "))));
 	}
 

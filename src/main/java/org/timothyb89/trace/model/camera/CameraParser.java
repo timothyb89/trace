@@ -21,13 +21,13 @@ import static org.timothyb89.trace.model.camera.CameraParseUtil.*;
 @Accessors(fluent = true)
 public class CameraParser {
 
-	@Getter private Camera camera;
+	@Getter private Camera.CameraBuilder camera;
 	@Getter private State state;
 
 	private int lineIndex;
 
 	public CameraParser() {
-		camera = new Camera();
+		camera = Camera.builder();
 		state = readFocalPoint;
 		lineIndex = 0;
 	}
@@ -107,7 +107,7 @@ public class CameraParser {
 		System.out.println(parser);
 		parser.read("0.0 1.0 0.0");
 		System.out.println(parser);
-		parser.read("340.0");;
+		parser.read("340.0");
 		System.out.println(parser);
 		parser.read("-128 -128 127 127");
 		System.out.println(parser);

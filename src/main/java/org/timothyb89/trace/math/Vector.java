@@ -146,6 +146,18 @@ public class Vector extends Matrix {
 		return this;
 	}
 
+	public Vector add(Vector other) {
+		super.add(other);
+		
+		return this;
+	}
+	
+	public Vector sub(Vector other) {
+		super.sub(other);
+		
+		return this;
+	}
+
 	public boolean orthogonal(Vector other) {
 		double d = other.dot(this);
 		
@@ -167,6 +179,10 @@ public class Vector extends Matrix {
 		}
 		
 		return minIndex;
+	}
+	
+	public Vector trim(int length) {
+		return new Vector(Arrays.copyOfRange(data, 0, length));
 	}
 
 	@Override
