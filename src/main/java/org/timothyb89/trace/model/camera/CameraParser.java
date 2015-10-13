@@ -21,7 +21,7 @@ import static org.timothyb89.trace.model.camera.CameraParseUtil.*;
 @Accessors(fluent = true)
 public class CameraParser {
 
-	@Getter private Camera.CameraBuilder camera;
+	private Camera.CameraBuilder camera;
 	@Getter private State state;
 
 	private int lineIndex;
@@ -52,6 +52,10 @@ public class CameraParser {
 							ex.getMessage()),
 					ex);
 		}
+	}
+
+	public Camera camera() {
+		return camera.build();
 	}
 
 	private final State readBounds = line -> expect(line, ints(4, values -> {

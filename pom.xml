@@ -55,7 +55,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>org.timothyb89.trace.util.ModelREPL</mainClass>
+                            <mainClass>org.timothyb89.trace.math.tracer.Tracer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

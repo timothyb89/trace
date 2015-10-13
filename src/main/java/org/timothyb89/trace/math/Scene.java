@@ -15,6 +15,4 @@ public class Scene {
 	private Camera camera;
 	private List<Model> models;
 	
-	
-	
 }

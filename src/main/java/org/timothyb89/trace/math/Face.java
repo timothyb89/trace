@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
@@ -12,6 +13,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
+@ToString(of = {"vertices"})
 public class Face {
 	
 	private final Model parent;
@@ -56,9 +58,19 @@ public class Face {
 	}
 	
 	public Stream<Vector> vertexStream() {
-		return IntStream.of(vertices).mapToObj(i -> parent.vertex(i));
+		return IntStream.of(vertices).mapToObj(parent::vertex);
 	}
-	
+
+	public Stream<Vector> edgeStream() {
+		return IntStream.range(0, vertices.length)
+				.mapToObj(i -> {
+					Vector a = vertex(i);
+					Vector b = vertex((i + 1) % vertices.length);
+					return b.sub(a);
+				});
+
+	}
+
 	public Vector vertex(int faceIndex) {
 		return parent.vertex(vertices[faceIndex]);
 	}

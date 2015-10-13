@@ -1,6 +1,8 @@
 package org.timothyb89.trace.math.tracer;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+
 import org.timothyb89.trace.math.Camera;
 import org.timothyb89.trace.math.Face;
 import org.timothyb89.trace.math.Model;
@@ -13,10 +15,18 @@ import org.timothyb89.trace.math.Vector;
  */
 public class TraceTask implements Callable<TraceResult> {
 
+	private CountDownLatch latch;
 	private Scene scene;
 	private int row;
 	private int col;
-	
+
+	public TraceTask(CountDownLatch latch, Scene scene, int row, int col) {
+		this.latch = latch;
+		this.scene = scene;
+		this.row = row;
+		this.col = col;
+	}
+
 	private Vector ixPoint(Face face, Vector l, Vector unit) {
 		// N*P = -d, P = any vertex on face
 		double d = -(face.surfaceNormal().dot(face.firstVertex3()));
@@ -38,16 +48,32 @@ public class TraceTask implements Callable<TraceResult> {
 	private boolean intersects(Face face, Vector l, Vector unit) {
 		// assuming polys from PLY model are in order?
 		Vector p = ixPoint(face, l, unit);
+		if (p == null) {
+			return false;
+		}
+
+		Vector[] edges = face.edgeStream()
+				.map(v -> v.trim(3))
+				.toArray(Vector[]::new);
+
+		// N = e1 x e2
+		Vector n = edges[0].copy().cross(edges[1]);
 		
-		for (int v1 = 0; v1 < face.size(); v1++) {
-			int v2 = (v1 + 1) % face.size();
-			
-			Vector edge = face.vertex(v2).copy().sub(face.vertex(v1));
-			
-			// TODO continue here
+		for (int i = 0; i < face.size(); i++) {
+			Vector v = face.vertex(i).trim(3);
+			Vector e = edges[i];
+
+			Vector epvj = p.copy().sub(v);
+			Vector np = epvj.cross(e);
+
+			double res = np.dot(n);
+			if (res < 0) {
+				// TODO: is this valid?
+				return false;
+			}
 		}
 		
-		return false; // TODO
+		return true;
 	}
 	
 	@Override
@@ -62,12 +88,14 @@ public class TraceTask implements Callable<TraceResult> {
 		for (Model m : scene.models()) {
 			for (Face f : m.faces()) {
 				if (intersects(f, l, unit)) {
-					return new TraceResult(255, 255, 255);
+					latch.countDown();
+					return new TraceResult(row, col, 255, 255, 255);
 				}
 			}
 		}
-		
-		return new TraceResult(0, 0, 0);
+
+		latch.countDown();
+		return new TraceResult(row, col, 0, 0, 0);
 	}
 	
 }

@@ -17,7 +17,7 @@ public class Camera {
 	private final Vector lookAtPoint;
 	private final Vector viewUp;
 	private final double focalLength;
-	private final int[] bounds;
+	private final int[] bounds; // -u, -v, +u, +v
 	
 	/**
 	 * The View Plane Normal axis (VPN), looking directly down the camera.
@@ -51,6 +51,14 @@ public class Camera {
 		this.bounds = bounds;
 		
 		resolveAxes();
+	}
+
+	public int width() {
+		return bounds[2] - bounds[0] + 1; // (u) - (-u), inclusive rage
+	}
+
+	public int height() {
+		return bounds[3] - bounds[1] + 1; // (v) - (-v), inclusive range
 	}
 	
 	private void resolveAxes() {

@@ -42,5 +42,17 @@ public class Image {
 
 		return this;
 	}
+
+	public int red(int x, int y) {
+		return red[(y * width) + x];
+	}
+
+	public int green(int x, int y) {
+		return green[(y * width) + x];
+	}
+
+	public int blue(int x, int y) {
+		return blue[(y * width) + x];
+	}
 	
 }
