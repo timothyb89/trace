@@ -101,6 +101,10 @@ public class Model {
 		return vertexData.vectorCol(index);
 	}
 
+	public Face face(int index) {
+		return faces.get(index);
+	}
+
 	public Model copy() {
 		return new Model(
 				vertexData.copy(),

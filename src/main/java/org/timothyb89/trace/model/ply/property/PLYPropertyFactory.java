@@ -24,6 +24,7 @@ public class PLYPropertyFactory {
 		properties.put("float",   properties.get("float32"));
 		properties.put("int32",   (name, i) -> new PLYInt32Property(name, i));
 		properties.put("int",     properties.get("int32"));
+		properties.put("uint",    properties.get("int32"));
 		properties.put("list",    (name, i) -> new PLYListProperty(name, i));
 	}
 	
