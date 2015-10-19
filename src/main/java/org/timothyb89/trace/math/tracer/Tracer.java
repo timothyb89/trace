@@ -28,7 +28,7 @@ public class Tracer {
 		this.scene = scene;
 		
 		int threads = Runtime.getRuntime().availableProcessors();
-		System.out.printf("Using %d thread%s",
+		System.out.printf("Using %d thread%s\n",
 				threads,
 				threads == 1 ? "" : "s");
 		
