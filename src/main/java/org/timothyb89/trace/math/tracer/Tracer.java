@@ -26,9 +26,15 @@ public class Tracer {
 
 	public Tracer(Scene scene) {
 		this.scene = scene;
-
+		
+		int threads = Runtime.getRuntime().availableProcessors();
+		System.out.printf("Using %d thread%s",
+				threads,
+				threads == 1 ? "" : "s");
+		
 		//executor = Executors.newSingleThreadExecutor();
-		executor = Executors.newFixedThreadPool(4);
+		//executor = Executors.newFixedThreadPool(4);
+		executor = Executors.newFixedThreadPool(threads);
 	}
 
 	public void trace() {
@@ -103,7 +109,7 @@ public class Tracer {
 			Model model = PLYParser.readPath(Paths.get(args[i])).toModel();
 			models.add(model);
 
-			System.out.println("Loaded model: " + args[1]);
+			System.out.println("Loaded model: " + args[i]);
 		}
 
 		scene.models(models);

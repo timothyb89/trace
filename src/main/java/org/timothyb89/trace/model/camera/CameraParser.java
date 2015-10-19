@@ -58,7 +58,7 @@ public class CameraParser {
 		return camera.build();
 	}
 
-	private final State readBounds = line -> expect(line, ints(4, values -> {
+	private final State readBounds = line -> expect(line, bounds(values -> {
 		camera.bounds(values);
 
 		return null;

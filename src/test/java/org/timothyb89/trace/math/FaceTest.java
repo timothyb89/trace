@@ -30,22 +30,27 @@ public class FaceTest {
 
 	@Test
 	public void testIxPoint() throws Exception {
-		System.out.println("plane: " + model.centerMass());
-
 		Vector l = camera.lensPoint(0, 0);
-		System.out.println("lens point: " + l);
-
 		Vector e = camera.focalPoint();
-		System.out.println("focal point: " + e);
 		Vector u = l.copy().sub(e).normalize();
-		System.out.println("u: " + u);
+		
 		Vector ix = a.ixPoint(l, u);
-		System.out.println("ix: " + ix);
+		System.out.println(ix);
+		assertTrue(ix != null);
+		assertTrue(ix.epsilonEquals(Vector.of(0, 0, 0)));
 	}
 
 	@Test
-	public void testSurfaceNormal() throws Exception {
-		System.out.println(a);
+	public void testIntersects() throws Exception {
+		Vector l = camera.lensPoint(0, 0);
+		Vector e = camera.focalPoint();
+		Vector u = l.copy().sub(e).normalize();
+		assertTrue(a.intersects(l, u));
+		
+		l = camera.lensPoint(1, 0);
+		e = camera.focalPoint();
+		u = l.copy().sub(e).normalize();
+		assertFalse(a.intersects(l, u));
 	}
 
 }

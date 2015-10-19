@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  */
 public class Matrix {
 
-	public static final double EPSILON = 0.0001d;
+	public static final double EPSILON = 0.000001d;
 
 	private final int rows;
 	private final int cols;
@@ -243,23 +243,23 @@ public class Matrix {
 		return this;
 	}
 	
-	/**
-	 * Subtract each element of the given matrix from this matrix, storing the
-	 * result back in this matrix.
-	 * @param other the matrix to subtract from this matrix
-	 * @return this matrix
-	 */
-	public Matrix sub(Matrix other) {
-		if (rows != other.rows || cols != other.cols) {
-			throw new IllegalArgumentException("Matrix size mismatch");
-		}
-
-		for (int i = 0; i < rows * cols; i++) {
-			data[i] += other.data[i];
-		}
-
-		return this;
+/**
+ * Subtract each element of the given matrix from this matrix, storing the
+ * result back in this matrix.
+ * @param other the matrix to subtract from this matrix
+ * @return this matrix
+ */
+public Matrix sub(Matrix other) {
+	if (rows != other.rows || cols != other.cols) {
+		throw new IllegalArgumentException("Matrix size mismatch");
 	}
+
+	for (int i = 0; i < rows * cols; i++) {
+		data[i] -= other.data[i];
+	}
+
+	return this;
+}
 
 	public Matrix scale(double factor) {
 		for (int i = 0; i < rows * cols; i++) {

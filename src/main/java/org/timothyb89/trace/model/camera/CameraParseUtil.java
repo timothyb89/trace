@@ -25,6 +25,31 @@ public class CameraParseUtil {
 					return NO_MATCH;
 				});
 	}
+	
+	public static DescribedFunction<String, State> bounds(
+			Function<int[], State> onMatch) {
+		return describe(
+				"int[4] -> bounds[-u, -v, +u, +v]",
+				s -> {
+					int[] params = Stream.of(s.split(" "))
+							.mapToInt(Integer::parseInt)
+							.toArray();
+					
+					if (params.length != 4) {
+						return NO_MATCH;
+					}
+					
+					if (params[0] >= params[2]) {
+						return NO_MATCH;
+					}
+					
+					if (params[1] >= params[3]) {
+						return NO_MATCH;
+					}
+					
+					return onMatch.apply(params);
+				});
+	}
 
 	public static DescribedFunction<String, State> doubles(
 			int length, Function<double[], State> onMatch) {

@@ -2,8 +2,6 @@ package org.timothyb89.trace.math;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.util.Arrays;
 import lombok.Builder;
 
 /**
@@ -64,7 +62,7 @@ public class Camera {
 	private void resolveAxes() {
 		n = lookAtPoint.copy().sub(focalPoint).normalize();
 		u = n.copy().cross(viewUp).normalize();
-		v = n.copy().cross(u);
+		v = u.copy().cross(n);
 		
 		baseLoc = focalPoint.copy().add(n.copy().scale(focalLength));
 	}

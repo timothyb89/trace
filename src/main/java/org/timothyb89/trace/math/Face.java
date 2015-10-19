@@ -50,17 +50,25 @@ public class Face {
 
 	public Vector ixPoint(Vector l, Vector unit) {
 		// N*P = -d, P = any vertex on face
-		double d = -1 * surfaceNormal.dot(firstVertex3());
+		//double d = -1 * surfaceNormal.dot(firstVertex3());
+		double d = -1 * surfaceNormal.dot(vertex3(2));
 
+		//System.out.println("d=" + d);
+		
 		double nL = surfaceNormal.dot(l);
 		double nU = surfaceNormal.dot(unit);
 		if (nU == 0) {
+			//System.err.println("error: parallel");
 			return null;
 		}
 
+		//System.out.println("n*l=" + nL);
+		//System.out.println("n*u=" + nU);
+		
 		// t = -(N*L + d) / N*U
-		double t = -(nL + d) / nU;
+		double t = ((-d) - nL) / nU;
 		if (t <= 0) {
+			//System.out.println("error: behind camera: " + t);
 			return null;
 		}
 
@@ -71,13 +79,23 @@ public class Face {
 		return l.copy().add(unit.copy().scale(t));
 	}
 
+	private Side getSide(double value) {
+		if (value < -Vector.EPSILON) {
+			return Side.LEFT;
+		} else if (value >= Vector.EPSILON) {
+			return Side.RIGHT;
+		} else {
+			return Side.RIGHT;
+		}
+	}
+	
 	public boolean intersects(Vector l, Vector unit) {
 		// assuming polys from PLY model are in order?
 		Vector p = ixPoint(l, unit);
 		if (p == null) {
 			return false;
 		}
-
+		
 		Vector[] edges = edgeStream()
 				.map(v -> v.trim(3))
 				.toArray(Vector[]::new);
@@ -85,21 +103,27 @@ public class Face {
 		// N = e1 x e2
 		Vector n = edges[0].copy().cross(edges[1]);
 
+		Side lastSide = null;
 		for (int i = 0; i < size(); i++) {
-			Vector v = vertex(i).trim(3);
+			Vector v = vertex3(i);
 			Vector e = edges[i];
 
 			Vector epvj = p.copy().sub(v);
 			Vector np = epvj.cross(e);
 
-			// round-off check? ~0
 			double res = np.dot(n);
-			if (res < 0) {
-				// TODO: is this valid?
+			
+			Side side = getSide(res);
+			//System.out.println("res: " + res + ", side: " + side);
+			if (lastSide == null) {
+				lastSide = side;
+			} else if (side != lastSide) {
+				//System.out.println("violated! :(");
 				return false;
 			}
+			
 		}
-
+		
 		return true;
 	}
 
@@ -131,6 +155,10 @@ public class Face {
 		return parent.vertex(vertices[faceIndex]);
 	}
 	
+	public Vector vertex3(int faceIndex) {
+		return parent.vertex(vertices[faceIndex]).trim(3);
+	}
+	
 	public Vector firstVertex() {
 		return parent.vertex(vertices[0]);
 	}
@@ -141,6 +169,12 @@ public class Face {
 	
 	public int size() {
 		return vertices.length;
+	}
+	
+	private enum Side {
+		LEFT,
+		RIGHT,
+		ON
 	}
 	
 }

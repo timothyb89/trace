@@ -15,10 +15,10 @@ import org.timothyb89.trace.math.Vector;
  */
 public class TraceTask implements Callable<TraceResult> {
 
-	private CountDownLatch latch;
-	private Scene scene;
-	private int row;
-	private int col;
+	private final CountDownLatch latch;
+	private final Scene scene;
+	private final int row;
+	private final int col;
 
 	public TraceTask(CountDownLatch latch, Scene scene, int row, int col) {
 		this.latch = latch;
