@@ -17,15 +17,18 @@ public class FaceTest {
 	private Camera camera;
 	private Model model;
 	private Face a;
-	private Face b;
-	private Face c;
-	private Face d;
+
+	private Camera sphereCamera;
+	private Model sphere;
 
 	@Before
 	public void setUp() {
 		camera = CameraParser.readPath(Paths.get("data/unitx.cam")).camera();
 		model = PLYParser.readPath(Paths.get("data/unitplane.ply")).toModel();
 		a = model.face(0);
+
+		sphereCamera = CameraParser.readPath(Paths.get("data/sphere.cam")).camera();
+		sphere = PLYParser.readPath(Paths.get("data/sphere.ply")).toModel();
 	}
 
 	@Test
@@ -51,6 +54,17 @@ public class FaceTest {
 		e = camera.focalPoint();
 		u = l.copy().sub(e).normalize();
 		assertFalse(a.intersects(l, u));
+	}
+
+	@Test
+	public void testRounding() throws Exception {
+		Vector l = sphereCamera.lensPoint(0, 0);
+		Vector e = sphereCamera.focalPoint();
+		Vector u = l.copy().sub(e).normalize();
+
+		Face ix = sphere.intersect(l, u);
+		System.out.println(ix);
+		//assertTrue(ix != null);
 	}
 
 }

@@ -105,6 +105,16 @@ public class Model {
 		return faces.get(index);
 	}
 
+	public Face intersect(Vector point, Vector direction) {
+		for (Face face : faces) {
+			if (face.intersects(point, direction)) {
+				return face;
+			}
+		}
+
+		return null;
+	}
+
 	public Model copy() {
 		return new Model(
 				vertexData.copy(),

@@ -85,7 +85,7 @@ public class Face {
 		} else if (value >= Vector.EPSILON) {
 			return Side.RIGHT;
 		} else {
-			return Side.RIGHT;
+			return Side.LEFT;
 		}
 	}
 	
