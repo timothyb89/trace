@@ -13,8 +13,8 @@ public class TraceResult {
 
 	private final int row;
 	private final int col;
-	private final int red;
-	private final int green;
-	private final int blue;
+	private final double red;
+	private final double green;
+	private final double blue;
 	
 }

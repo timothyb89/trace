@@ -2,8 +2,10 @@ package org.timothyb89.trace.util;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Various functional utilities.
@@ -19,12 +21,41 @@ public class F {
 		
 	}
 
+	@FunctionalInterface
+	public interface LoopWithIndexConsumer<T> {
+
+		void accept(T t, int i);
+
+	}
+
 	public static <T> void forEach(Collection<T> collection,
 			LoopWithIndexAndSizeConsumer<T> consumer) {
 		int index = 0;
 		for (T object : collection) {
 			consumer.accept(object, index++, collection.size());
 		}
+	}
+
+	private static class StreamIndexIterator<T> implements Consumer<T> {
+
+		private LoopWithIndexConsumer consumer;
+		private int index;
+
+		public StreamIndexIterator(LoopWithIndexConsumer<T> consumer) {
+			this.consumer = consumer;
+			index = 0;
+		}
+
+		@Override
+		public void accept(T t) {
+			consumer.accept(t, index);
+			index++;
+		}
+	}
+
+	public static <T> void forEach(
+			Stream<T> stream, LoopWithIndexConsumer<T> consumer) {
+		stream.forEach(new StreamIndexIterator<T>(consumer));
 	}
 
 	public static TimedCompletableFuture<Void> timeVoid(Runnable func) {

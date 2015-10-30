@@ -7,10 +7,12 @@ import org.timothyb89.trace.math.Scene;
 import org.timothyb89.trace.model.camera.CameraParser;
 import org.timothyb89.trace.model.image.PPMWriter;
 import org.timothyb89.trace.model.ply.PLYParser;
+import org.timothyb89.trace.model.scene.SceneParser;
 import org.timothyb89.trace.util.F;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -35,6 +37,13 @@ public class Tracer {
 		//executor = Executors.newSingleThreadExecutor();
 		//executor = Executors.newFixedThreadPool(4);
 		executor = Executors.newFixedThreadPool(threads);
+	}
+
+	private int scale(double val, double min, double max) {
+		double range = max - min;
+		double off = val - min;
+
+		return (int) (255.0 * (off / range));
 	}
 
 	public void trace() {
@@ -72,18 +81,46 @@ public class Tracer {
 		executor.shutdown();
 
 		System.out.println("Trace complete, generating image...");
-		output = new Image(camera.width(), camera.height());
+
+		// collect results + determine min/max intensity
+		double minIntensity = 0;
+		double maxIntensity = 0;
+		boolean first = true;
+
+		List<TraceResult> results = new LinkedList<>();
 		for (Future<TraceResult> result : tasks) {
 			try {
 				TraceResult r = result.get();
+				double max = Math.max(r.red(), Math.max(r.green(), r.blue()));
+				double min = Math.min(r.red(), Math.min(r.green(), r.blue()));
 
-				output.set(
-						r.col() - bounds[0], r.row() - bounds[1],
-						r.red(), r.green(), r.blue());
+				if (first || max > maxIntensity) {
+					maxIntensity = max;
+				}
+
+				if (first || min < minIntensity) {
+					minIntensity = min;
+				}
+
+				first = false;
+				results.add(result.get());
 			} catch (InterruptedException | ExecutionException e) {
 				// ignore?
 				e.printStackTrace();
 			}
+		}
+
+		// generate image
+		output = new Image(camera.width(), camera.height());
+
+		for (TraceResult r : results) {
+			int red = scale(r.red(), minIntensity, maxIntensity);
+			int green = scale(r.green(), minIntensity, maxIntensity);
+			int blue = scale(r.blue(), minIntensity, maxIntensity);
+
+			output.set(
+					r.col() - bounds[0], r.row() - bounds[1],
+					red, green, blue);
 		}
 	}
 
@@ -92,8 +129,8 @@ public class Tracer {
 	}
 
 	public static void main(String[] args) {
-		if (args.length < 3) {
-			System.err.println("Usage: tracer [camera] [models...] [output.ppm]");
+		if (args.length < 4) {
+			System.err.println("Usage: tracer [camera] [scene] [models...] [output]");
 			System.exit(1);
 			return;
 		}
@@ -101,18 +138,19 @@ public class Tracer {
 		Camera camera = CameraParser.readPath(Paths.get(args[0])).camera();
 		System.out.println("Loaded camera: " + camera);
 
-		Scene scene = new Scene();
-		scene.camera(camera);
-
+		// load models (1+ required)
 		List<Model> models = new ArrayList<>();
-		for (int i = 1; i < args.length - 1; i++) {
+		for (int i = 2; i < args.length - 1; i++) {
 			Model model = PLYParser.readPath(Paths.get(args[i])).toModel();
 			models.add(model);
 
-			System.out.println("Loaded model: " + args[i]);
+			System.out.printf("Loaded model: %s (%d faces)\n", args[i], model.countFaces());
 		}
 
-		scene.models(models);
+		// create scene + apply config
+		Scene scene = new Scene(camera, models);
+		SceneParser.readPath(scene, Paths.get(args[1]));
+		System.out.println("Loaded scene configuration: " + scene);
 
 		Tracer tracer = new Tracer(scene);
 		F.timeVoid(tracer::trace).thenAcceptTime(time -> {

@@ -15,6 +15,8 @@ import org.timothyb89.trace.math.Matrix;
 import org.timothyb89.trace.math.Model;
 import org.timothyb89.trace.math.Transform;
 import org.timothyb89.trace.math.Vector;
+import org.timothyb89.trace.util.F;
+
 import static org.timothyb89.trace.model.ParseUtil.*;
 import static org.timothyb89.trace.model.ply.PLYParseUtil.*;
 
@@ -149,11 +151,12 @@ public class PLYParser {
 				.limit(vertex.length())
 				.toArray());
 		model.vertexData(vertices);
-		
-		model.faces(face.listValues("face", Integer.class)
-				.map(l -> (List<Integer>) l)
-				.map(l -> new Face(model, l))
-				.collect(Collectors.toList()));
+
+		List<Face> faces = new ArrayList<>();
+		F.forEach(face.listValues("face", Integer.class), (indices, i) -> {
+			faces.add(new Face(model, i, indices));
+		});
+		model.faces(faces);
 
 		return model;
 	}

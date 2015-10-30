@@ -180,7 +180,24 @@ public class Vector extends Matrix {
 		
 		return minIndex;
 	}
-	
+
+	public Vector multiply(Matrix other) {
+		Vector ret = new Vector(other.rows());
+
+		double sum;
+		for (int row = 0; row < ret.rows(); row++) {
+			sum = 0;
+
+			for (int k = 0; k < other.cols(); k++) {
+				sum += other.val(row, k) * this.val(k, 0);
+			}
+
+			ret.val(row, 0, sum);
+		}
+
+		return ret;
+	}
+
 	public Vector trim(int length) {
 		return new Vector(Arrays.copyOfRange(data, 0, length));
 	}

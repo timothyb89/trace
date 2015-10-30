@@ -17,21 +17,30 @@ import lombok.experimental.Accessors;
 public class Face {
 	
 	private final Model parent;
+	private final int index;
 	private final int[] vertices;
 
+	private Material material;
+
 	private final Vector surfaceNormal;
-	
-	public Face(Model parent, int... vertices) {
+
+	public Face(Model parent, int index, int... vertices) {
 		this.parent = parent;
+		this.index = index;
 		this.vertices = vertices;
-		
+
+		material = Material.DEFAULT;
+
 		surfaceNormal = calcNormal();
 	}
 	
-	public Face(Model parent, List<Integer> vertices) {
+	public Face(Model parent, int index, List<Integer> vertices) {
 		this.parent = parent;
+		this.index = index;
 		this.vertices = vertices.stream().mapToInt(i -> i).toArray();
-		
+
+		material = Material.DEFAULT;
+
 		surfaceNormal = calcNormal();
 	}
 	
@@ -52,28 +61,42 @@ public class Face {
 		// N*P = -d, P = any vertex on face
 		//double d = -1 * surfaceNormal.dot(firstVertex3());
 		double d = -1 * surfaceNormal.dot(vertex3(2));
-
-		//System.out.println("d=" + d);
 		
 		double nL = surfaceNormal.dot(l);
 		double nU = surfaceNormal.dot(unit);
 		if (nU == 0) {
-			//System.err.println("error: parallel");
+			// parallel
 			return null;
 		}
-
-		//System.out.println("n*l=" + nL);
-		//System.out.println("n*u=" + nU);
 		
 		// t = -(N*L + d) / N*U
 		double t = ((-d) - nL) / nU;
 		if (t <= 0) {
-			//System.out.println("error: behind camera: " + t);
+			// behind camera
 			return null;
 		}
 
-		// TODO: ix is only relevant if t is > 0
-		// otherwise behind camera
+		// P = L + tU
+		return l.copy().add(unit.copy().scale(t));
+	}
+
+	public Vector ixPointAny(Vector normal, Vector l, Vector unit) {
+		// N*P = -d, P = any vertex on face
+		double d = -1 * normal.dot(firstVertex3());
+
+		double nL = normal.dot(l);
+		double nU = normal.dot(unit);
+		if (nU == 0) {
+			// parallel
+			return null;
+		}
+
+		// t = -(N*L + d) / N*U
+		double t = ((-d) - nL) / nU;
+		if (t >= -Vector.EPSILON && t <= Vector.EPSILON) {
+			// bad?
+			return null;
+		}
 
 		// P = L + tU
 		return l.copy().add(unit.copy().scale(t));
@@ -88,14 +111,12 @@ public class Face {
 			return Side.LEFT;
 		}
 	}
-	
-	public boolean intersects(Vector l, Vector unit) {
-		// assuming polys from PLY model are in order?
-		Vector p = ixPoint(l, unit);
-		if (p == null) {
+
+	public boolean intersects(Vector ix) {
+		if (ix == null) {
 			return false;
 		}
-		
+
 		Vector[] edges = edgeStream()
 				.map(v -> v.trim(3))
 				.toArray(Vector[]::new);
@@ -108,23 +129,26 @@ public class Face {
 			Vector v = vertex3(i);
 			Vector e = edges[i];
 
-			Vector epvj = p.copy().sub(v);
+			Vector epvj = ix.copy().sub(v);
 			Vector np = epvj.cross(e);
 
 			double res = np.dot(n);
-			
+
 			Side side = getSide(res);
-			//System.out.println("res: " + res + ", side: " + side);
 			if (lastSide == null) {
 				lastSide = side;
 			} else if (side != lastSide) {
-				//System.out.println("violated! :(");
+				// not on same side, not in polygon
 				return false;
 			}
-			
+
 		}
-		
+
 		return true;
+	}
+
+	public boolean intersects(Vector point, Vector direction) {
+		return intersects(ixPoint(point, direction));
 	}
 
 	public boolean contains(int vertex) {
@@ -173,8 +197,7 @@ public class Face {
 	
 	private enum Side {
 		LEFT,
-		RIGHT,
-		ON
+		RIGHT;
 	}
 	
 }
