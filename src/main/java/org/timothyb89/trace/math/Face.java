@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-@ToString(of = {"vertices", "surfaceNormal"})
+@ToString(of = {"index", "vertices", "surfaceNormal"})
 public class Face {
 	
 	private final Model parent;
@@ -57,6 +57,26 @@ public class Face {
 		return crossB.cross(crossA).normalize();
 	}
 
+	public double ixDistance(Vector point, Vector direction) {
+		// N*P = -d, P = any vertex on face
+		//double d = -1 * surfaceNormal.dot(firstVertex3());
+		double d = -1 * surfaceNormal.dot(vertex3(2));
+		
+		double nL = surfaceNormal.dot(point);
+		double nU = surfaceNormal.dot(direction);
+		if (nU == 0) {
+			// parallel
+			return 0;
+		}
+		
+		// t = -(N*L + d) / N*U
+		return ((-d) - nL) / nU;
+	}
+	
+	public Vector ixPoint(Vector point, Vector direction, double t) {
+		return point.copy().add(direction.copy().scale(t));
+	}
+	
 	public Vector ixPoint(Vector l, Vector unit) {
 		// N*P = -d, P = any vertex on face
 		//double d = -1 * surfaceNormal.dot(firstVertex3());
@@ -117,6 +137,7 @@ public class Face {
 			return false;
 		}
 
+		// TODO: optimize me :(
 		Vector[] edges = edgeStream()
 				.map(v -> v.trim(3))
 				.toArray(Vector[]::new);

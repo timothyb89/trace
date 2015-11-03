@@ -139,6 +139,15 @@ public class Vector extends Matrix {
 		return this;
 	}
 	
+	public double distance() {
+		double sum = 0;
+		for (double d : data) {
+			sum += d * d;
+		}
+		
+		return Math.sqrt(sum);
+	}
+	
 	@Override
 	public Vector scale(double factor) {
 		super.scale(factor);

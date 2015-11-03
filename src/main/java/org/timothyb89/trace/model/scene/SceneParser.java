@@ -106,10 +106,6 @@ public class SceneParser {
 					"Invalid parameter count for point light");
 		}
 
-
-		System.out.println(Arrays.toString(tokens));
-		System.out.println(Arrays.toString(Arrays.copyOfRange(tokens, 1, 4)));
-
 		Vector color = parseColor(Arrays.copyOfRange(tokens, 1, 4));
 		Vector position = parsePoint(Arrays.copyOfRange(tokens, 4, 7));
 		PointLight light = new PointLight(color, position);
@@ -149,8 +145,8 @@ public class SceneParser {
 
 			Material mat = Material.of(diffuseColor, specularity, shininess);
 
-			System.out.println("Applying material to faces " + faceStart + " ... " + faceEnd);
-			System.out.println(diffuseColor);
+			//System.out.println("Applying material to faces " + faceStart + " ... " + faceEnd);
+			//System.out.println(diffuseColor);
 			Model model = scene.model(modelIndex);
 
 			int end = Math.min(faceEnd, model.countFaces() - 1);

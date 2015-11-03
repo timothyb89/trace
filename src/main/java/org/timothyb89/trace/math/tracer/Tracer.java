@@ -34,9 +34,9 @@ public class Tracer {
 				threads,
 				threads == 1 ? "" : "s");
 		
-		//executor = Executors.newSingleThreadExecutor();
+		executor = Executors.newSingleThreadExecutor();
 		//executor = Executors.newFixedThreadPool(4);
-		executor = Executors.newFixedThreadPool(threads);
+		//executor = Executors.newFixedThreadPool(threads);
 	}
 
 	private int scale(double val, double min, double max) {
@@ -150,7 +150,12 @@ public class Tracer {
 		// create scene + apply config
 		Scene scene = new Scene(camera, models);
 		SceneParser.readPath(scene, Paths.get(args[1]));
-		System.out.println("Loaded scene configuration: " + scene);
+		System.out.printf(
+				"Loaded scene configuration: %d model%s, %d light source%s\n",
+				scene.models().size(),
+				scene.models().size() == 1? "" : "s",
+				scene.lights().size(),
+				scene.lights().size() == 1? "" : "s");
 
 		Tracer tracer = new Tracer(scene);
 		F.timeVoid(tracer::trace).thenAcceptTime(time -> {

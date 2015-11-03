@@ -33,8 +33,6 @@ public class TraceTask implements Callable<TraceResult> {
 			ambientColor = Vector.of(0, 0, 0); // TODO: ?
 		}
 
-		//System.out.println("Ambient color: " + ambientColor);
-
 		// I = Kd * Ba
 		Vector ambientIntensity = ambientColor.multiply(diffuseMatrix);
 
@@ -53,14 +51,14 @@ public class TraceTask implements Callable<TraceResult> {
 		light_iter:
 		for (PointLight light : scene.lights()) {
 			// find ray from ix point -> light source (direction vector)
-			Vector l = light.position().copy()
-					.sub(ix)
-					.normalize();
+			Vector l = light.position().copy().sub(ix);
+			double distL = l.distance();
+			l.normalize();
 
 			// check for self-occlusion
 			double nL = n.dot(l);
+			
 			if (nL < 0) { // TODO: round-off error?
-				System.out.println("self occluding " + nL);
 				continue;
 			}
 
@@ -72,27 +70,34 @@ public class TraceTask implements Callable<TraceResult> {
 						continue;
 					}
 
-					// TODO: may need different ix method for t != 0?
-					// TODO: check t for rounding error?
-					//if (f.intersects(ix, l)) {
-					Vector subIx = f.ixPointAny(n, ix, l);
+					double t = f.ixDistance(ix, l);
+					if (t == 0) {
+						continue;
+					}
+					
+					// make sure poly f falls between the ix face and the light
+					// source
+					if (t < Vector.EPSILON || t > distL) {
+						continue;
+					}
+					
+					Vector subIx = f.ixPoint(ix, l, t);
 					if (f.intersects(subIx)) {
-						System.out.printf("ix: %s %s\n", ix, l);
+						// occluded, not visible
 						continue light_iter;
 					}
 				}
 			}
 
-			System.out.println("can has light source");
-
 			double nl = n.dot(l);
 
 			// diffuse intensity
-
+			
 			// KdBl * nl
 			Vector diffuseIntensity = light.rgb()
 					.multiply(face.material().diffuse())
 					.scale(nl);
+			
 			intensity.add(diffuseIntensity);
 
 			// determine reflected ray
@@ -123,13 +128,10 @@ public class TraceTask implements Callable<TraceResult> {
 		
 		for (Model m : scene.models()) {
 			for (Face f : m.faces()) {
-				//System.out.println("F#" + m.faces().indexOf(f));
 				Vector ix = f.ixPoint(l, unit);
 
 				if (f.intersects(ix)) {
 					Vector color = calculateLighting(f, ix, unit);
-
-					//System.out.println("Returning: " + color);
 
 					latch.countDown();
 					return new TraceResult(row, col,

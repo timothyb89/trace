@@ -29,10 +29,6 @@ public class Material {
 		mat.specularity(specularity);
 		mat.shininess(shininess);
 
-		System.out.println("New material: " + mat);
-		System.out.println(color);
-		System.out.println(mat.diffuse().format());
-
 		return mat;
 	}
 

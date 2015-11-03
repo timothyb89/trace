@@ -23,7 +23,6 @@ public class PointLight {
 	}
 
 	public PointLight color(Vector color) {
-		System.out.println("color: " + color + ", length " + color.length());
 		if (color.length() != 3 && color.length() != 4) {
 			throw new IllegalArgumentException(
 					"Color must have 3 or 4 parameters");
