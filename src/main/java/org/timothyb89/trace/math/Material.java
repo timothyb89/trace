@@ -15,7 +15,15 @@ public class Material {
 			0, 1);
 
 	private Matrix diffuse;
+
+	/**
+	 * Specularity constant k_s
+	 */
 	private double specularity;
+
+	/**
+	 * Phong constant, alpha
+	 */
 	private double shininess;
 
 	public static Material of(

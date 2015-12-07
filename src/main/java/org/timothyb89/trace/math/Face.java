@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @ToString(of = {"index", "vertices", "surfaceNormal"})
 public class Face {
-	
+
 	private final Model parent;
 	private final int index;
 	private final int[] vertices;
@@ -33,7 +33,7 @@ public class Face {
 
 		surfaceNormal = calcNormal();
 	}
-	
+
 	public Face(Model parent, int index, List<Integer> vertices) {
 		this.parent = parent;
 		this.index = index;
@@ -43,7 +43,7 @@ public class Face {
 
 		surfaceNormal = calcNormal();
 	}
-	
+
 	private Vector calcNormal() {
 		// plz don't be colinear, kthx
 		// also we'll need >= 3 vertices
@@ -61,34 +61,34 @@ public class Face {
 		// N*P = -d, P = any vertex on face
 		//double d = -1 * surfaceNormal.dot(firstVertex3());
 		double d = -1 * surfaceNormal.dot(vertex3(2));
-		
+
 		double nL = surfaceNormal.dot(point);
 		double nU = surfaceNormal.dot(direction);
 		if (nU == 0) {
 			// parallel
 			return 0;
 		}
-		
+
 		// t = -(N*L + d) / N*U
 		return ((-d) - nL) / nU;
 	}
-	
+
 	public Vector ixPoint(Vector point, Vector direction, double t) {
 		return point.copy().add(direction.copy().scale(t));
 	}
-	
+
 	public Vector ixPoint(Vector l, Vector unit) {
 		// N*P = -d, P = any vertex on face
 		//double d = -1 * surfaceNormal.dot(firstVertex3());
 		double d = -1 * surfaceNormal.dot(vertex3(2));
-		
+
 		double nL = surfaceNormal.dot(l);
 		double nU = surfaceNormal.dot(unit);
 		if (nU == 0) {
 			// parallel
 			return null;
 		}
-		
+
 		// t = -(N*L + d) / N*U
 		double t = ((-d) - nL) / nU;
 		if (t <= 0) {
@@ -178,10 +178,10 @@ public class Face {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public Stream<Vector> vertexStream() {
 		return IntStream.of(vertices).mapToObj(parent::vertex);
 	}
@@ -199,26 +199,26 @@ public class Face {
 	public Vector vertex(int faceIndex) {
 		return parent.vertex(vertices[faceIndex]);
 	}
-	
+
 	public Vector vertex3(int faceIndex) {
 		return parent.vertex(vertices[faceIndex]).trim(3);
 	}
-	
+
 	public Vector firstVertex() {
 		return parent.vertex(vertices[0]);
 	}
-	
+
 	public Vector firstVertex3() {
 		return firstVertex().trim(3);
 	}
-	
+
 	public int size() {
 		return vertices.length;
 	}
-	
+
 	private enum Side {
 		LEFT,
 		RIGHT;
 	}
-	
+
 }

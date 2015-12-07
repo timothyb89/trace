@@ -2,6 +2,7 @@ package org.timothyb89.trace.math;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,7 +13,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 public class Scene {
-	
+
 	private Camera camera;
 	private List<Model> models;
 
@@ -34,6 +35,10 @@ public class Scene {
 
 	public Model model(int index) {
 		return models.get(index);
+	}
+
+	public Stream<Face> faces() {
+		return models.stream().flatMap(model -> model.faces().stream());
 	}
 
 }
