@@ -129,7 +129,7 @@ public class SceneParser {
 		// 4,5,6: diffuse color
 		// 7: specular k_s
 		// 8: shininess alpha
-		if (tokens.length != 9) {
+		if (tokens.length != 10) {
 			throw new SceneParseException(
 					"Invalid parameter count for material");
 		}
@@ -142,8 +142,11 @@ public class SceneParser {
 			Vector diffuseColor = parseColor(Arrays.copyOfRange(tokens, 4, 7));
 			double specularity = bounded(tokens[7], "specularity");
 			double shininess = positive(tokens[8], "shininess");
+			double translucency = bounded(tokens[9], "translucency");
 
-			Material mat = Material.of(diffuseColor, specularity, shininess);
+			Material mat = Material.of(
+					diffuseColor,
+					specularity, shininess, translucency);
 
 			//System.out.println("Applying material to faces " + faceStart + " ... " + faceEnd);
 			//System.out.println(diffuseColor);

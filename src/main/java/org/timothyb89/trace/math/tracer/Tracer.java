@@ -34,9 +34,9 @@ public class Tracer {
 				threads,
 				threads == 1 ? "" : "s");
 		
-		executor = Executors.newSingleThreadExecutor();
+		//executor = Executors.newSingleThreadExecutor();
 		//executor = Executors.newFixedThreadPool(4);
-		//executor = Executors.newFixedThreadPool(threads);
+		executor = Executors.newFixedThreadPool(threads);
 	}
 
 	private int scale(double val, double min, double max) {
@@ -59,17 +59,30 @@ public class Tracer {
 			}
 		}
 
+		int total = tasks.size();
 		long startTime = System.currentTimeMillis();
 		System.out.printf("Submitted %d trace tasks, starting...\n", tasks.size());
+
+		try {
+			latch.await(1, TimeUnit.SECONDS);
+		} catch (InterruptedException ignored) { }
+
 		while (latch.getCount() > 0) {
 			try {
 				double elapsed = (System.currentTimeMillis() - startTime) / 1000.0;
-				System.out.printf(
-						"[Trace] %d tasks remain. Elapsed time: %.3f seconds.\n",
-						latch.getCount(),
-						elapsed);
+				double rate = (total - latch.getCount()) / elapsed;
 
-				latch.await(1, TimeUnit.SECONDS);
+				System.out.printf(
+						"[Trace] %-5d tasks remain (%4.1f%%). " +
+								"%3.0fs elapsed, " +
+								"%3.1fs est @ %.1f tasks/sec.\n",
+						latch.getCount(),
+						(1 - (double) latch.getCount() / (double) total) * 100,
+						elapsed,
+						latch.getCount() / rate,
+						rate);
+
+				latch.await(3, TimeUnit.SECONDS);
 			} catch (InterruptedException ex) {
 				System.err.printf(
 						"[Warn] Trace interrupted with %d tasks remaining\n",

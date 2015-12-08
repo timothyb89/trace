@@ -212,6 +212,17 @@ public class Face {
 		return firstVertex().trim(3);
 	}
 
+	public Vector midpoint() {
+		Vector sum = Vector.zeroes(4);
+
+		vertexStream().forEach(sum::add);
+
+		return Vector.of(
+				sum.val(0) / vertices.length,
+				sum.val(1) / vertices.length,
+				sum.val(2) / vertices.length);
+	}
+
 	public int size() {
 		return vertices.length;
 	}

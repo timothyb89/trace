@@ -1,0 +1,15 @@
+ply
+format ascii 1.0
+comment Created by Blender 2.74 (sub 0) - www.blender.org, source file: 'scene.blend'
+element vertex 4
+property float x
+property float y
+property float z
+element face 1
+property list uchar uint vertex_indices
+end_header
+-1021.775452 -1062.889038 -271.599915
+978.224548 -1062.889038 -271.599915
+978.224548 937.110901 -271.599915
+-1021.775452 937.110901 -271.599915
+4 0 1 2 3

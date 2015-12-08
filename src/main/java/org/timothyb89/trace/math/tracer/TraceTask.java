@@ -1,10 +1,14 @@
 package org.timothyb89.trace.math.tracer;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import org.timothyb89.trace.math.*;
+import org.timothyb89.trace.util.Triple;
 import org.timothyb89.trace.util.Tuple;
 
 /**
@@ -31,14 +35,15 @@ public class TraceTask implements Callable<TraceResult> {
 		this.col = col;
 	}
 
-	private Tuple<Face, Vector> intersect_(Vector point, Vector direction) {
-		// tries to use min t values, but causes self occlusion in shaded() :(
-		double minT = 0;
-		Vector minIx = null;
-		Face minFace = null;
+	private Triple<Double, Face, Vector> intersect(Vector point, Vector direction, Face ignore) {
+		List<Triple<Double, Face, Vector>> intersections = new ArrayList<>();
 
 		for (Model m : scene.models()) {
 			for (Face f : m.faces()) {
+				if (f == ignore) {
+					continue;
+				}
+
 				double t = f.ixDistance(point, direction);
 
 				// must be in front of camera
@@ -46,26 +51,24 @@ public class TraceTask implements Callable<TraceResult> {
 					continue;
 				}
 
-				if (minIx == null || t < minT) {
-					Vector ix = f.ixPoint(point, direction, t);
-
-					if (f.intersects(ix)) {
-						minT = t;
-						minFace = f;
-						minIx = ix;
-					}
+				Vector ix = f.ixPoint(point, direction, t);
+				if (f.intersects(ix)) {
+					intersections.add(new Triple<>(t, f, ix));
 				}
 			}
 		}
 
-		if (minIx == null) {
+		intersections.sort(Comparator.comparingDouble(Triple::a));
+
+		if (intersections.isEmpty()) {
 			return null;
 		} else {
-			return new Tuple<>(minFace, minIx);
+			Triple<Double, Face, Vector> ret = intersections.get(0);
+			return ret;
 		}
 	}
 
-	private Tuple<Face, Vector> intersect(Vector point, Vector direction) {
+	private Tuple<Face, Vector> intersect_(Vector point, Vector direction) {
 		for (Model m : scene.models()) {
 			for (Face f : m.faces()) {
 				double t = f.ixDistance(point, direction);
@@ -86,7 +89,7 @@ public class TraceTask implements Callable<TraceResult> {
 		return null;
 	}
 
-	private boolean shaded(Vector point, Face face, PointLight light, Vector n) {
+	private boolean shaded(Vector point, Face face, PointLight light, Vector n, Face ignore) {
 		// find ray from ix point -> light source (direction vector)
 		Vector l = light.position().copy().sub(point);
 		double distL = l.distance();
@@ -97,14 +100,13 @@ public class TraceTask implements Callable<TraceResult> {
 		// check for self-occlusion
 		double nL = n.dot(l);
 		if (nL < 0) { // TODO: round-off error?
-			//System.out.println("self occluded :(");
 			return true;
 		}
 
 		// make sure the path is clear
 		for (Model m : scene.models()) {
 			for (Face f : m.faces()) {
-				if (f == face) {
+				if (f == face || f == ignore) {
 					// don't attempt ix with the current face
 					continue;
 				}
@@ -165,20 +167,22 @@ public class TraceTask implements Callable<TraceResult> {
 				.scale(Math.pow(v.dot(r), face.material().shininess()));
 	}
 
-	private Vector reflect(Vector point, Vector direction, int depth, double ksp) {
+	private Vector reflect(Vector point, Vector direction, int depth, double ksp, Face ignore) {
 		Vector intensity = Vector.zeroes(3);
 		if (depth > MAX_DEPTH) {
 			return intensity;
 		}
 
 		// find the world intersection details - only 1 can exist
-		Tuple<Face, Vector> ixTuple = intersect(point, direction);
+		Triple<Double, Face, Vector> ixTuple = intersect(point, direction, ignore);
 		if (ixTuple == null) {
 			return intensity; // TODO should this be ambient at least?
 		}
 
-		Face face = ixTuple.a();
-		Vector ix = ixTuple.b();
+		Face face = ixTuple.b();
+		Vector ix = ixTuple.c();
+
+		//System.out.println("ix: " + face + " @ " + ix);
 
 		// find opposite view vector and the correct surface normal
 		// if negative, flip it
@@ -191,7 +195,7 @@ public class TraceTask implements Callable<TraceResult> {
 		intensity.add(ambient(face));
 
 		for (PointLight light : scene.lights()) {
-			if (!shaded(ix, face, light, n)) {
+			if (!shaded(ix, face, light, n, ignore)) {
 				// find ray from ix point -> light source (direction vector)
 				Vector l = light.position().copy().sub(ix);
 				l.normalize();
@@ -202,19 +206,26 @@ public class TraceTask implements Callable<TraceResult> {
 		}
 
 		ksp *= face.material().specularity();
+
+		// specular recursive reflection
 		if (ksp > MIN_RECURSE_INTENSITY) {
-			// bounce around more
 			Vector reflected = n.copy()
 					.scale(2 * n.dot(v))
 					.sub(v);
 
-			intensity.add(reflect(ix, reflected, depth + 1, ksp));
+			intensity.add(reflect(ix, reflected, depth + 1, ksp, face)
+					.scale(face.material().specularity()));
+		}
+
+		if (!face.material().isOpaque()) {
+			intensity.add(reflect(ix, direction, depth + 1, ksp, face)
+					.scale(face.material().translucency()));
 		}
 
 		return intensity;
 	}
 
-	//@Override
+	@Override
 	public TraceResult call() throws Exception {
 		Camera camera = scene.camera();
 
@@ -232,7 +243,7 @@ public class TraceTask implements Callable<TraceResult> {
 						((double) col) - 0.5 + rand.nextDouble());
 				Vector e = camera.focalPoint();
 				Vector unit = l.copy().sub(e).normalize();
-				Vector color = reflect(l, unit, 0, 1);
+				Vector color = reflect(l, unit, 0, 1, null);
 
 				sumR += color.val(0);
 				sumG += color.val(1);
@@ -248,7 +259,7 @@ public class TraceTask implements Callable<TraceResult> {
 			Vector l = camera.lensPoint(row, col);
 			Vector e = camera.focalPoint();
 			Vector unit = l.copy().sub(e).normalize();
-			Vector color = reflect(l, unit, 0, 1);
+			Vector color = reflect(l, unit, 0, 1, null);
 
 			latch.countDown();
 			return new TraceResult(row, col,
