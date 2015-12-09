@@ -19,6 +19,7 @@ public class Face {
 	private final Model parent;
 	private final int index;
 	private final int[] vertices;
+	private final Vector[] edges;
 
 	private Material material;
 
@@ -32,6 +33,7 @@ public class Face {
 		material = Material.DEFAULT;
 
 		surfaceNormal = calcNormal();
+		edges = calcEdges();
 	}
 
 	public Face(Model parent, int index, List<Integer> vertices) {
@@ -42,6 +44,7 @@ public class Face {
 		material = Material.DEFAULT;
 
 		surfaceNormal = calcNormal();
+		edges = calcEdges();
 	}
 
 	private Vector calcNormal() {
@@ -55,6 +58,12 @@ public class Face {
 		Vector crossB = c.copy().sub(b);
 
 		return crossB.cross(crossA).normalize();
+	}
+
+	private Vector[] calcEdges() {
+		return edgeStream()
+				.map(v -> v.trim(3))
+				.toArray(Vector[]::new);
 	}
 
 	public double ixDistance(Vector point, Vector direction) {
@@ -137,11 +146,6 @@ public class Face {
 			return false;
 		}
 
-		// TODO: optimize me :(
-		Vector[] edges = edgeStream()
-				.map(v -> v.trim(3))
-				.toArray(Vector[]::new);
-
 		// N = e1 x e2
 		Vector n = edges[0].copy().cross(edges[1]);
 
@@ -162,7 +166,6 @@ public class Face {
 				// not on same side, not in polygon
 				return false;
 			}
-
 		}
 
 		return true;
