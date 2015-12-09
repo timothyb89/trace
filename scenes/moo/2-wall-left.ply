@@ -1,18 +1,15 @@
 ply
 format ascii 1.0
-comment Created by Blender 2.74 (sub 0) - www.blender.org, source file: 'scene.blend'
+comment Created by Blender 2.73 (sub 0) - www.blender.org, source file: 'scene.blend'
 element vertex 4
 property float x
 property float y
 property float z
-property float nx
-property float ny
-property float nz
 element face 1
 property list uchar uint vertex_indices
 end_header
--1021.775574 -1062.889038 1731.800171 1.000000 0.000000 0.000000
--1021.775452 -1062.889038 -268.199829 1.000000 0.000000 0.000000
--1021.775452 937.110901 -268.199829 1.000000 0.000000 0.000000
--1021.775574 937.110901 1731.800171 1.000000 0.000000 0.000000
+-1021.775574 -1062.889038 1696.800171
+-1021.775452 -1062.889038 -303.199829
+-1021.775452 937.110901 -303.199829
+-1021.775574 937.110901 1696.800171
 4 0 1 2 3
