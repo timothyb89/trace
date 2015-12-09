@@ -144,12 +144,16 @@ public class SceneParser {
 			double shininess = positive(tokens[8], "shininess");
 			double translucency = bounded(tokens[9], "translucency");
 
+			if (modelIndex >= scene.models().size()) {
+				System.out.println("[Warn] ignoring material for out-of-bounds "
+						+ "model #" + modelIndex);
+				return;
+			}
+
 			Material mat = Material.of(
 					diffuseColor,
 					specularity, shininess, translucency);
 
-			//System.out.println("Applying material to faces " + faceStart + " ... " + faceEnd);
-			//System.out.println(diffuseColor);
 			Model model = scene.model(modelIndex);
 
 			int end = Math.min(faceEnd, model.countFaces() - 1);
