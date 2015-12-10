@@ -21,10 +21,10 @@ public class Matrix {
 		if (rows <= 0 || cols <= 0) {
 			throw new IllegalArgumentException("Invalid matrix dimensions!");
 		}
-		
+
 		this.rows = rows;
 		this.cols = cols;
-		
+
 		data = new double[rows * cols];
 	}
 
@@ -32,7 +32,7 @@ public class Matrix {
 		if (rows <= 0 || cols <= 0) {
 			throw new IllegalArgumentException("Invalid matrix dimensions!");
 		}
-		
+
 		if (rows * cols != data.length) {
 			throw new IllegalArgumentException("Invalid data length!");
 		}
@@ -69,7 +69,7 @@ public class Matrix {
 		}
 
 		this.data = Arrays.copyOf(data, rows * cols);
-		
+
 		return this;
 	}
 
@@ -135,33 +135,33 @@ public class Matrix {
 
 		return this;
 	}
-	
+
 	public Matrix col(int col, Vector vector) {
 		return col(col, vector.data());
 	}
-	
+
 	public Matrix colInsert(int col, double... values) {
 		if (col < 0 || col >= cols) {
 			throw new IllegalArgumentException(
 					"Column is out of bounds: " + col);
 		}
-		
+
 		if (values.length > rows) {
 			throw new IllegalArgumentException(
 					"Too many values to insert into column");
 		}
-		
+
 		for (int i = 0; i < values.length; i++) {
 			val(i, col, values[i]);
 		}
-		
+
 		return this;
 	}
-	
+
 	public Matrix colInsert(int col, Vector vector) {
 		return colInsert(col, vector.data());
 	}
-	
+
 	public Stream<double[]> colStream() {
 		return IntStream.range(0, cols).mapToObj(i -> col(i));
 	}
@@ -210,7 +210,7 @@ public class Matrix {
 	public Matrix row(int row, Vector vector) {
 		return row(row, vector.data());
 	}
-	
+
 	public Matrix rowInsert(int row, double... values) {
 		if (row < 0 || row >= rows) {
 			throw new IllegalArgumentException("Row is out of bounds: " + row);
@@ -220,11 +220,11 @@ public class Matrix {
 
 		return this;
 	}
-	
+
 	public Matrix rowInsert(int row, Vector vector) {
 		return rowInsert(row, vector.data());
 	}
-	
+
 	/**
 	 * Add each element of the given matrix to this matrix, storing the result
 	 * back in this matrix.
@@ -242,24 +242,24 @@ public class Matrix {
 
 		return this;
 	}
-	
-/**
- * Subtract each element of the given matrix from this matrix, storing the
- * result back in this matrix.
- * @param other the matrix to subtract from this matrix
- * @return this matrix
- */
-public Matrix sub(Matrix other) {
-	if (rows != other.rows || cols != other.cols) {
-		throw new IllegalArgumentException("Matrix size mismatch");
-	}
 
-	for (int i = 0; i < rows * cols; i++) {
-		data[i] -= other.data[i];
-	}
+	/**
+	 * Subtract each element of the given matrix from this matrix, storing the
+	 * result back in this matrix.
+	 * @param other the matrix to subtract from this matrix
+	 * @return this matrix
+	 */
+	public Matrix sub(Matrix other) {
+		if (rows != other.rows || cols != other.cols) {
+			throw new IllegalArgumentException("Matrix size mismatch");
+		}
 
-	return this;
-}
+		for (int i = 0; i < rows * cols; i++) {
+			data[i] -= other.data[i];
+		}
+
+		return this;
+	}
 
 	public Matrix scale(double factor) {
 		for (int i = 0; i < rows * cols; i++) {
@@ -289,8 +289,9 @@ public Matrix sub(Matrix other) {
 	}
 
 	/**
-	 * Multiply the specified matrix "into" this matrix and return the result
-	 * as a new matrix, such that {@code ret = [other] * [this]}.
+	 * Multiply the specified matrix "into" this matrix and return the result as
+	 * a new matrix, such that {@code ret = [other] * [this]}.
+	 *
 	 * @param other the matrix to multiply by
 	 * @return the result of the multiplication in a new matrix
 	 */
@@ -301,6 +302,7 @@ public Matrix sub(Matrix other) {
 
 		return multiplyIterative(other);
 	}
+
 	/**
 	 * Generate a minor of this matrix, excluding row {@code i} and column
 	 * {@code j} to produce a matrix of size {@code rows - 1 x cols - 1}.
@@ -310,27 +312,28 @@ public Matrix sub(Matrix other) {
 	 */
 	public Matrix minor(int i, int j) {
 		double[] ret = new double[(rows - 1) * (cols - 1)];
-		
+
 		int retIndex = 0;
 		for (int dataIndex = 0; dataIndex < data.length; dataIndex++) {
 			if (dataIndex / cols == i) {
 				continue;
 			}
-			
+
 			if (dataIndex % cols == j) {
 				continue;
 			}
-			
+
 			ret[retIndex] = data[dataIndex];
 			retIndex++;
 		}
-		
+
 		return new Matrix(rows - 1, cols - 1, ret);
-		
+
 	}
 
 	/**
 	 * Calculates the determinant of this matrix.
+	 *
 	 * @return the calculated determinant
 	 */
 	public double det() {
@@ -346,7 +349,7 @@ public Matrix sub(Matrix other) {
 			return (data[0] * data[3]) - (data[1] * data[2]);
 		} else {
 			double det = 0;
-			
+
 			// move along first row.
 			for (int i = 0; i < size; i++) {
 				if (i % 2 == 0) {
@@ -355,7 +358,7 @@ public Matrix sub(Matrix other) {
 					det -= data[i] * minor(0, i).det();
 				}
 			}
-			
+
 			return det;
 		}
 	}
